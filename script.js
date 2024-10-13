@@ -3,7 +3,7 @@
 class workout {
   date = new Date();
   id = (Date.now() + "").slice(-10);
-
+  clicks = 0;
   constructor(coords, distance, duration) {
     this.coords = coords;
     this.distance = distance;
@@ -30,6 +30,10 @@ class workout {
     this.description = `${this.type[0].toUpperCase()}${this.type.slice(1)} on ${
       months[this.date.getMonth()]
     } ${this.date.getDate()}`;
+  }
+
+  click() {
+    this.clicks++;
   }
 }
 
@@ -81,11 +85,12 @@ class App {
   #map;
   #mapEvent;
   #workouts = [];
-
+  #mapZoomLevel = 13;
   constructor() {
     this._getPosition();
     form.addEventListener("submit", this._newWorkout.bind(this));
     inputType.addEventListener("change", this._toggleElevationField.bind(this));
+    containerWorkouts.addEventListener("click", this._moveToPopup.bind(this));
   }
 
   _getPosition() {
@@ -102,7 +107,7 @@ class App {
     console.log(`https://www.google.pl/maps/@${latitude},${longitude}`);
     const coords = [latitude, longitude];
 
-    this.#map = L.map("map").setView(coords, 13);
+    this.#map = L.map("map").setView(coords, this.#mapZoomLevel);
 
     L.tileLayer("https://tile.openstreetmap.fr/hot/{z}/{x}/{y}.png", {
       attribution:
@@ -168,7 +173,6 @@ class App {
     }
     //aDD NEW OBECT TO WORKOUT ARRAY
     this.#workouts.push(workout);
-    console.log(workout);
 
     //RENDER WORKOUT ON MAP AS MARKER
     this._renderWorkoutMarker(workout);
@@ -240,6 +244,20 @@ class App {
           </div></li>`;
 
     form.insertAdjacentHTML("afterend", html);
+  }
+
+  _moveToPopup(e) {
+    const workoutEl = e.target.closest(".workout");
+
+    if (!workoutEl) return;
+
+    const workoutData = this.#workouts.find((work) => work.id === workoutEl.dataset.id);
+
+    this.#map.setView(workoutData.coords, this.#mapZoomLevel, {
+      animate: true,
+      pan: { duration: 1 },
+    });
+    workoutData.click();
   }
 }
 
