@@ -32,9 +32,9 @@ class workout {
     } ${this.date.getDate()}`;
   }
 
-  click() {
-    this.clicks++;
-  }
+  // click() {
+  //   this.clicks++;
+  // }
 }
 
 class Running extends workout {
@@ -87,7 +87,12 @@ class App {
   #workouts = [];
   #mapZoomLevel = 13;
   constructor() {
+    //GET USERS POSITION
     this._getPosition();
+
+    //GET DATA FROM LOCAL STORAGE
+    this._getLocalStorage();
+
     form.addEventListener("submit", this._newWorkout.bind(this));
     inputType.addEventListener("change", this._toggleElevationField.bind(this));
     containerWorkouts.addEventListener("click", this._moveToPopup.bind(this));
@@ -104,7 +109,7 @@ class App {
   _loadMap(position) {
     const { latitude } = position.coords;
     const { longitude } = position.coords;
-    console.log(`https://www.google.pl/maps/@${latitude},${longitude}`);
+
     const coords = [latitude, longitude];
 
     this.#map = L.map("map").setView(coords, this.#mapZoomLevel);
@@ -116,6 +121,10 @@ class App {
 
     //Handling clicks on map
     this.#map.on("click", this._showForm.bind(this));
+
+    this.#workouts.forEach((work) => {
+      this._renderWorkoutMarker(work);
+    });
   }
 
   _showForm(mapE) {
@@ -182,6 +191,9 @@ class App {
 
     //CLEAR INPUT FIELDS
     this._hideForm();
+
+    //Set local storage to workouts
+    this._setLocalStorage();
   }
 
   _renderWorkoutMarker(workout) {
@@ -257,7 +269,28 @@ class App {
       animate: true,
       pan: { duration: 1 },
     });
-    workoutData.click();
+    // workoutData.click();
+  }
+
+  _setLocalStorage() {
+    localStorage.setItem("workouts", JSON.stringify(this.#workouts));
+  }
+
+  _getLocalStorage() {
+    const data = JSON.parse(localStorage.getItem("workouts"));
+
+    if (!data) return;
+
+    this.#workouts = data;
+
+    this.#workouts.forEach((work) => {
+      this._renderWorkout(work);
+    });
+  }
+
+  reset() {
+    localStorage.removeItem("workouts");
+    location.reload();
   }
 }
 
