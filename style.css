@@ -47,6 +47,7 @@ a:visited {
   padding: 3rem 5rem 4rem 5rem;
   display: flex;
   flex-direction: column;
+  position: relative;
 }
 
 .logo {
@@ -76,6 +77,7 @@ a:visited {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr 1fr;
   gap: 0.75rem 1.5rem;
+  position: relative;
 }
 .workout--running {
   border-left: 5px solid var(--color-brand--2);
@@ -217,4 +219,37 @@ a:visited {
 }
 .cycling-popup .leaflet-popup-content-wrapper {
   border-left: 5px solid var(--color-brand--1);
+}
+
+ion-icon {
+  width: 2.4rem;
+  height: 2.4rem;
+}
+.workout__edit-btn,
+.workout__delete-btn,
+.btn-sort,
+.btn-delete-all {
+  position: absolute;
+  border: none;
+  background-color: transparent;
+  cursor: pointer;
+  color: white;
+}
+.workout__delete-btn {
+  right: 0;
+}
+
+.workout__edit-btn {
+  right: 10%;
+}
+
+.btn-sort {
+  right: 10%;
+  top: 10rem;
+  text-decoration: underline;
+}
+.btn-delete-all {
+  right: 20%;
+  top: 10rem;
+  text-decoration: underline;
 }
