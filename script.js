@@ -281,12 +281,6 @@ class App {
 
       workoutEl.remove();
 
-      this.#map.eachLayer((layer) => {
-        if (layer instanceof L.Marker && layer.getPopup().getContent().includes(workoutId)) {
-          this.#map.removeLayer(layer);
-        }
-      });
-
       this._setLocalStorage();
       this.reset();
     }
