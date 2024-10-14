@@ -90,12 +90,17 @@ class App {
     //GET USERS POSITION
     this._getPosition();
 
-    //GET DATA FROM LOCAL STORAGE
+    // GET DATA FROM LOCAL STORAGE
     this._getLocalStorage();
 
     form.addEventListener("submit", this._newWorkout.bind(this));
     inputType.addEventListener("change", this._toggleElevationField.bind(this));
     containerWorkouts.addEventListener("click", this._moveToPopup.bind(this));
+    document.querySelector(".btn-sort").addEventListener("click", this._sortWorkout.bind(this));
+    containerWorkouts.addEventListener("click", this._deleteWorkout.bind(this));
+    document
+      .querySelector(".btn-delete-all")
+      .addEventListener("click", this._deleteAllWorkout.bind(this));
   }
 
   _getPosition() {
@@ -124,6 +129,7 @@ class App {
 
     this.#workouts.forEach((work) => {
       this._renderWorkoutMarker(work);
+      this._renderWorkout(work);
     });
   }
 
@@ -192,7 +198,7 @@ class App {
     //CLEAR INPUT FIELDS
     this._hideForm();
 
-    //Set local storage to workouts
+    // //Set local storage to workouts
     this._setLocalStorage();
   }
 
@@ -216,10 +222,12 @@ class App {
     let html = `
     <li class="workout workout--${workout.type}" data-id="${workout.id}">
           <h2 class="workout__title">${workout.description}</h2>
+          <button class='workout__delete-btn'><ion-icon name="close-circle-outline"></ion-icon></button>
+          <button class='workout__edit-btn'><ion-icon name="create-outline"></ion-icon></button>
           <div class="workout__details">
             <span class="workout__icon">${workout.type === "running" ? "🏃‍♂️" : "🚴‍♂️"}</span>
             <span class="workout__value">${workout.distance}</span>
-            <span class="workout__unit">${workout.distance}</span>
+            <span class="workout__unit">km</span>
           </div>
           <div class="workout__details">
             <span class="workout__icon">⏱</span>
@@ -258,6 +266,50 @@ class App {
     form.insertAdjacentHTML("afterend", html);
   }
 
+  _deleteWorkout(e) {
+    const clicked = e.target.closest(".workout__delete-btn");
+
+    if (!clicked) return;
+
+    const workoutEl = clicked.closest(".workout");
+    const workoutId = workoutEl.dataset.id;
+
+    const workoutIndex = this.#workouts.findIndex((work) => work.id === workoutId);
+
+    if (workoutIndex !== -1) {
+      this.#workouts.splice(workoutIndex, 1);
+
+      workoutEl.remove();
+
+      this.#map.eachLayer((layer) => {
+        if (layer instanceof L.Marker && layer.getPopup().getContent().includes(workoutId)) {
+          this.#map.removeLayer(layer);
+        }
+      });
+
+      this._setLocalStorage();
+      this.reset();
+    }
+  }
+
+  _deleteAllWorkout() {
+    localStorage.clear();
+    this.reset();
+  }
+
+  _sortWorkout() {
+    // Sort workouts by distance
+    this.#workouts.sort((a, b) => a.distance - b.distance);
+
+    // Clear the current list
+    document.querySelectorAll(".workout").forEach((work) => work.remove());
+
+    // Render sorted workouts
+    this.#workouts.forEach((work) => {
+      this._renderWorkout(work);
+    });
+  }
+
   _moveToPopup(e) {
     const workoutEl = e.target.closest(".workout");
 
@@ -283,13 +335,13 @@ class App {
 
     this.#workouts = data;
 
-    this.#workouts.forEach((work) => {
-      this._renderWorkout(work);
-    });
+    // this.#workouts.forEach((work) => {
+    //   this._renderWorkout(work);
+    // });
   }
 
   reset() {
-    localStorage.removeItem("workouts");
+    // localStorage.removeItem("workouts");
     location.reload();
   }
 }
